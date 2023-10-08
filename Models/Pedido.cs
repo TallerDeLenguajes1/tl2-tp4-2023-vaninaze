@@ -9,7 +9,7 @@ public class Pedido
     private Cliente? cliente;
     private Cadete? cadete;
 
-    public int Numero { get => numero; }
+    public int Numero { get => numero; set => numero = value; }
     public string Observacion { get => observacion; set => observacion = value; }
     public int Estado { get => estado; set => estado = value; }
     public Cliente Cliente { get => cliente; set => cliente = value; }

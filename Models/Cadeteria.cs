@@ -68,11 +68,6 @@ public class Cadeteria
             return false;
         }
     }
-    public void AgregarCadete(Cadete cad){
-        ListaCadetes.Add(cad);
-
-        accesoCadetes.Guardar(ListaCadetes);
-    }
     public bool AsignarPedido(int idPed, int idCad){
         Cadete? cadBuscado = ListaCadetes.FirstOrDefault(cad => cad.Id == idCad);
         Pedido? pedido = ListaPedidos.FirstOrDefault(pedido => pedido.Numero == idPed);
@@ -129,5 +124,27 @@ public class Cadeteria
         informe.CargarInforme(ListaPedidos);
         string resultado = informe.GetInforme();
         return resultado;
+    }
+    //TP6
+    public Pedido? GetPedido(int idPed){
+        Pedido? ped = ListaPedidos.FirstOrDefault(ped => ped.Numero == idPed);
+        return ped;
+    }
+    public Cadete? GetCadete(int idCad){
+        Cadete? cadete = ListaCadetes.FirstOrDefault(cadete => cadete.Id == idCad);
+        return cadete;
+    }
+    public Cadete? BuscarCadete(int idCad){
+        Cadete? cad = ListaCadetes.FirstOrDefault(cad => cad.Id == idCad);
+        return cad;
+    }
+    public bool AddCadete(Cadete nuevoCadete){
+        ListaCadetes.Add(nuevoCadete);
+        nuevoCadete.Id = ListaCadetes.Count();
+        if(accesoCadetes.Guardar(ListaCadetes)){
+            return true;
+        } else {
+            return false;
+        }
     }
 }
