@@ -2,6 +2,7 @@ namespace EspacioPedido;
 
 using System.Text.Json.Serialization;
 
+using EspacioPedido;
 using EspacioDatos;
 using EspacioInforme;
 
@@ -9,95 +10,119 @@ public class Cadeteria
 {
     private string nombre;
     private string telefono;
-    private List<Cadete> ListaCadetes = new List<Cadete>();
-    private List<Pedido> ListaPedidos = new List<Pedido>();
-    private static Cadeteria? cadeteria;
+    private List<Cadete>? ListaCadetes = new List<Cadete>();
+    private List<Pedido>? ListaPedidos = new List<Pedido>();
+    private AccesoADatosCadetes? accesoCadetes;
+    private AccesoADatosPedidos? accesoPedidos;
 
-    [JsonPropertyName("Nombre")] //indico que el campo Nombre en JSON se guarda aqui
-    public string Nombre { get => nombre; set => nombre = value; }
-     
-    [JsonPropertyName("Telefono")]
-    public string Telefono { get => telefono; set => telefono = value; }
-
-    //inicializo la cadeteria con singleton
-    public static Cadeteria GetInstancia(){
-        if(cadeteria == null){
-            AccesoADatosCadeteria jsonCadeterias = new();
-            cadeteria = jsonCadeterias.Obtener();
-
-            AccesoADatosCadetes jsonCadetes = new();
-            cadeteria.ListaCadetes = jsonCadetes.Obtener();
-        }
-        return cadeteria;
-    }
     public Cadeteria(){
-        
+
+    }
+
+    public Cadeteria(AccesoADatosCadeteria accCadeteria){ 
+
+        Cadeteria cadeteria = accCadeteria.Obtener();
+        nombre = cadeteria.nombre;
+        telefono = cadeteria.telefono;
+
+        //Obtengo los cadetes
+        accesoCadetes = new AccesoADatosCadetes();
+        ListaCadetes = accesoCadetes.Obtener();
+
+        //Obtengo los pedidos
+        accesoPedidos = new AccesoADatosPedidos();
+        ListaPedidos = accesoPedidos.Obtener();
     }
     public Cadeteria(string nomb = "", string tel = "")
     {
         this.nombre = nomb;
         this.telefono = tel;
     }
+    public string Nombre { get => nombre; set => nombre = value; }
+     
+    public string Telefono { get => telefono; set => telefono = value; }
+    
     public List<Pedido> GetPedidos(){
-        AccesoADatosPedidos jsonPedidos = new();
-        List<Pedido> listaPedidos = jsonPedidos.Obtener();
-        return listaPedidos;
+        return this.ListaPedidos;
     }
     public List<Cadete> GetCadetes()
     {
         return this.ListaCadetes;
     }
-    public void AgregarPedido(int num, string obs, string nomb, string dir, string telef, string datos){
-        Pedido pedido = new Pedido(num, obs, nomb, dir, telef, datos);
-        pedido.CambiarEstado(1);
+    public bool AgregarPedido(Pedido pedido, int idCad){
+        if(idCad != 0){
+            Cadete? cadBuscado = ListaCadetes.FirstOrDefault(cad => cad.Id == idCad);
+            if(cadBuscado != null){
+                pedido.GuardarCadete(cadBuscado);
+            } else {
+                return false;
+            }
+        }
         ListaPedidos.Add(pedido);
+        pedido.CambiarEstado(1);
+        pedido.AsignarNumero(ListaPedidos.Count());
 
-        AccesoADatosPedidos jsonPedidos = new();
-        jsonPedidos.Guardar(ListaPedidos);
+        if(accesoPedidos.Guardar(ListaPedidos)){
+            return true;
+        } else {
+            return false;
+        }
     }
     public void AgregarCadete(Cadete cad){
         ListaCadetes.Add(cad);
 
-        AccesoADatosCadetes jsonCadetes = new();
-        jsonCadetes.Guardar(ListaCadetes);
+        accesoCadetes.Guardar(ListaCadetes);
     }
-    public void AsignarPedido(int idPed, int idCad){
+    public bool AsignarPedido(int idPed, int idCad){
         Cadete? cadBuscado = ListaCadetes.FirstOrDefault(cad => cad.Id == idCad);
-        if(cadBuscado != null){
+        Pedido? pedido = ListaPedidos.FirstOrDefault(pedido => pedido.Numero == idPed);
+        if(cadBuscado != null && pedido != null){
             ListaPedidos[idPed].GuardarCadete(cadBuscado);
+            if(accesoPedidos.Guardar(ListaPedidos)){
+                return true;
+            } else {
+                return false;
+            }
         } else {
-            Console.WriteLine("Error! Cadete no encontrado");
+            return false;
         }
-        AccesoADatosPedidos jsonPedidos = new();
-        jsonPedidos.Guardar(ListaPedidos);
     }
-    public void CambiarCadetePedido(int idPed, int idCad)
+    public bool CambiarCadetePedido(int idPed, int idCad)
     {
         Pedido? ped = ListaPedidos.FirstOrDefault(ped => ped.Numero == idPed);
-        if(ped != null){
-            foreach (Cadete cad in ListaCadetes)
-            {
-                if (cad.Id == idCad && ped.IDcad != idCad)
-                {
-                    ped.GuardarCadete(cad);
-                }
-                else
-                {
-                    Console.WriteLine("Cadete no existe");
-                }
+        Cadete? cad = ListaCadetes.FirstOrDefault(cad => cad.Id == idCad);
+        if(ped != null && cad != null){
+            ped.GuardarCadete(cad);
+            if(accesoPedidos.Guardar(ListaPedidos)){
+                return true;
+            } else {
+                return false;
             }
-            AccesoADatosPedidos jsonPedidos = new();
-            jsonPedidos.Guardar(ListaPedidos);
+        } else {
+            return false;
         }
     }
-    public void CambiarEstadoPedido(int idPedido,int NuevoEstado){
-        ListaPedidos[idPedido].CambiarEstado(NuevoEstado);
-        AccesoADatosPedidos jsonPedidos = new();
-        jsonPedidos.Guardar(ListaPedidos);
+    public bool CambiarEstadoPedido(int idPedido,int NuevoEstado){
+        Pedido? ped = ListaPedidos.FirstOrDefault(ped => ped.Numero == idPedido);
+        if(ped != null){
+            ListaPedidos[idPedido].CambiarEstado(NuevoEstado);
+            
+            if(accesoPedidos.Guardar(ListaPedidos)){
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
     }
     public Pedido? BuscarPedido(int idPedido){
         Pedido? ped = ListaPedidos.FirstOrDefault(ped => ped.Numero == idPedido);
-        return ped;
+        if(ped == null){
+            return null;
+        } else {
+            return ped;
+        }
     }
     public string GetInforme(){
         Informe informe = new();

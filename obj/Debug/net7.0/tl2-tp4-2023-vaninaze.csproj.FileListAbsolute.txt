@@ -33,3 +33,4 @@ C:\tl2-tp4-2023-vaninaze\obj\Debug\net7.0\tl2-tp4-2023-vaninaze.genruntimeconfig
 C:\tl2-tp4-2023-vaninaze\obj\Debug\net7.0\ref\tl2-tp4-2023-vaninaze.dll
 C:\tl2-tp4-2023-vaninaze\bin\Debug\net7.0\Cadeteria.json
 C:\tl2-tp4-2023-vaninaze\bin\Debug\net7.0\Cadetes.json
+C:\tl2-tp4-2023-vaninaze\bin\Debug\net7.0\Pedidos.json

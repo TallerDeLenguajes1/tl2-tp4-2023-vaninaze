@@ -1,10 +1,11 @@
 namespace EspacioDatos;
 using System.Text.Json;
 using EspacioPedido;
+
 public class AccesoADatosCadetes{
     public List<Cadete> Obtener(){
-        string archivo = @"C:\tl2-tp4-2023-vaninaze\Cadetes.json";
-        string jsonString = File.ReadAllText(archivo);
+        string fileName = "Cadetes.json";
+        string jsonString = File.ReadAllText(fileName);
         List<Cadete> listaCadetes = JsonSerializer.Deserialize<List<Cadete>>(jsonString);
         return listaCadetes;
     }

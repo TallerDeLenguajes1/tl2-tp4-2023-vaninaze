@@ -3,35 +3,43 @@ using EspacioPedido;
 public class Pedido
 {
     private int numero;
-    private string observacion;
-    private Cliente cliente;
+    private string? observacion;
     private int estado;
 
-    private int idCad;
-    Cadete cadete;
+    private Cliente? cliente;
+    private Cadete? cadete;
 
-    public int IDcad { get => idCad; }
-    public int Estado { get => estado; }
     public int Numero { get => numero; }
+    public string Observacion { get => observacion; set => observacion = value; }
+    public int Estado { get => estado; set => estado = value; }
+    public Cliente Cliente { get => cliente; set => cliente = value; }
+    
+    public Cadete? Cadete { get => cadete; set => cadete = value; }
 
     public Pedido(){
+    
     }
+    
     public Pedido(int num, string obs, string nomb, string dir, string telef, string datos)
     {
         cliente = new Cliente(nomb, dir, telef, datos);
         numero = num;
         observacion = obs;
         estado = 0; //Pendiente
-        idCad = 0;
+        cadete = new Cadete();
+    }
+    public void AsignarNumero(int num){
+        numero = num;
     }
     public void GuardarCadete(Cadete cad){
         cadete = cad;
-        Console.WriteLine("Pedido ID: "+Numero);
-        Console.WriteLine("Nuevo Cadete: "+cad.Id);
     }
     public void CambiarEstado(int NuevoEstado)
     {
-        this.estado = NuevoEstado;
+        estado = NuevoEstado;
         //0: pendiente, 1:aceptado, 2:entregado
+    }
+    public int GetEstado(){
+        return estado;
     }
 }

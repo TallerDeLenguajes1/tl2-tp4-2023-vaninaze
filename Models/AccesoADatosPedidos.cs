@@ -1,22 +1,31 @@
 namespace EspacioDatos;
 using System.Text.Json;
 using EspacioPedido;
-public class AccesoADatosPedidos:AccesoADatos<List<Pedido>>{
-    public override List<Pedido> Obtener(){
+
+public class AccesoADatosPedidos{
+    public List<Pedido> Obtener(){
         string fileName = "Pedidos.json";
-        string jsonString = @"C:\tl2-tp4-2023-vaninaze\"+fileName;
-        List<Pedido> listaPedidos = JsonSerializer.Deserialize<List<Pedido>>(jsonString);
-        return listaPedidos;
+        if(File.Exists(fileName)){
+            string jsonString = File.ReadAllText(fileName);
+            List<Pedido> listaPedidos = JsonSerializer.Deserialize<List<Pedido>>(jsonString);
+            return listaPedidos;
+        } else {
+            return null;
+        }
     }
-    public void Guardar(List<Pedido> Pedidos){
+    public bool Guardar(List<Pedido> Pedidos){
         string fileName = "Pedidos.json";
         string jsonString = JsonSerializer.Serialize(Pedidos);
-        FileStream archivo = new FileStream(fileName, FileMode.Create);
+        File.WriteAllText(fileName, jsonString);
+        /*FileStream archivo = new FileStream(fileName, FileMode.Create);
         using(StreamWriter strWrite = new StreamWriter(archivo)){
             strWrite.WriteLine("{0}", jsonString);
             strWrite.Close();
+        }*/
+        if(jsonString != null){
+            return true;
+        } else {
+            return false;
         }
-        /*Otra forma de serializar:
-        File.WriteAllText(fileName, jsonString);*/
     }
 }
