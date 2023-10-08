@@ -11,7 +11,7 @@ public class Cadeteria
     private string telefono;
     private List<Cadete> ListaCadetes = new List<Cadete>();
     private List<Pedido> ListaPedidos = new List<Pedido>();
-    private static Cadeteria? instance;
+    private static Cadeteria? cadeteria;
 
     [JsonPropertyName("Nombre")] //indico que el campo Nombre en JSON se guarda aqui
     public string Nombre { get => nombre; set => nombre = value; }
@@ -20,16 +20,15 @@ public class Cadeteria
     public string Telefono { get => telefono; set => telefono = value; }
 
     //inicializo la cadeteria con singleton
-    public static Cadeteria GetInstance(){
-        if(instance == null){
-            AccesoJSON json = new();
-            List<Cadeteria> listaCadeterias = json.LeerCadeterias();
+    public static Cadeteria GetInstancia(){
+        if(cadeteria == null){
+            AccesoADatosCadeteria jsonCadeterias = new();
+            cadeteria = jsonCadeterias.Obtener();
 
-            instance = listaCadeterias[2];
-            
-            instance.ListaCadetes= json.LeerCadetes();
+            AccesoADatosCadetes jsonCadetes = new();
+            cadeteria.ListaCadetes = jsonCadetes.Obtener();
         }
-        return instance;
+        return cadeteria;
     }
     public Cadeteria(){
         
@@ -40,7 +39,9 @@ public class Cadeteria
         this.telefono = tel;
     }
     public List<Pedido> GetPedidos(){
-        return this.ListaPedidos;
+        AccesoADatosPedidos jsonPedidos = new();
+        List<Pedido> listaPedidos = jsonPedidos.Obtener();
+        return listaPedidos;
     }
     public List<Cadete> GetCadetes()
     {
@@ -50,24 +51,15 @@ public class Cadeteria
         Pedido pedido = new Pedido(num, obs, nomb, dir, telef, datos);
         pedido.CambiarEstado(1);
         ListaPedidos.Add(pedido);
-    }
-    public void crearCadete(int id, string nombre, string dir, string telef){
-        Cadete cad = new Cadete(id, nombre, dir, telef);
-        ListaCadetes.Add(cad);
+
+        AccesoADatosPedidos jsonPedidos = new();
+        jsonPedidos.Guardar(ListaPedidos);
     }
     public void AgregarCadete(Cadete cad){
         ListaCadetes.Add(cad);
-    }
-    public float JornalACobrar(int idCad){
-        float monto;
-        int cont=0;
-        foreach(Pedido ped in ListaPedidos){
-            if(ped.IDcad != 0 && ped.IDcad == idCad){
-                cont++;
-            }
-        }
-        monto = 500*cont;
-        return monto;
+
+        AccesoADatosCadetes jsonCadetes = new();
+        jsonCadetes.Guardar(ListaCadetes);
     }
     public void AsignarPedido(int idPed, int idCad){
         Cadete? cadBuscado = ListaCadetes.FirstOrDefault(cad => cad.Id == idCad);
@@ -76,6 +68,8 @@ public class Cadeteria
         } else {
             Console.WriteLine("Error! Cadete no encontrado");
         }
+        AccesoADatosPedidos jsonPedidos = new();
+        jsonPedidos.Guardar(ListaPedidos);
     }
     public void CambiarCadetePedido(int idPed, int idCad)
     {
@@ -92,10 +86,14 @@ public class Cadeteria
                     Console.WriteLine("Cadete no existe");
                 }
             }
+            AccesoADatosPedidos jsonPedidos = new();
+            jsonPedidos.Guardar(ListaPedidos);
         }
     }
     public void CambiarEstadoPedido(int idPedido,int NuevoEstado){
         ListaPedidos[idPedido].CambiarEstado(NuevoEstado);
+        AccesoADatosPedidos jsonPedidos = new();
+        jsonPedidos.Guardar(ListaPedidos);
     }
     public Pedido? BuscarPedido(int idPedido){
         Pedido? ped = ListaPedidos.FirstOrDefault(ped => ped.Numero == idPedido);
